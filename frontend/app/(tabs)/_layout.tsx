@@ -2,17 +2,29 @@ import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
-    <Tabs initialRouteName="Home">
+    <Tabs initialRouteName="Account">
       <Tabs.Screen
-        name="Home"
+        name="Account"
         options={{
-          title: "Home",
+          title: "Account",
         }}
       />
       <Tabs.Screen
-        name="Example"
+        name="MacroTracker"
         options={{
-          title: "Example",
+          title: "Macro Tracker",
+        }}
+      />
+      <Tabs.Screen
+        name="WorkoutTracker"
+        options={{
+          title: "WorkoutTracker",
+        }}
+      />
+      <Tabs.Screen
+        name="Progress"
+        options={{
+          title: "Progress",
         }}
       />
     </Tabs>

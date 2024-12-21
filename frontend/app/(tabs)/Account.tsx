@@ -1,17 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Link } from "expo-router";
 
-export default function ExampleScreen() {
+export default function AccountScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hello from ExampleScreen</Text>
-      <Link href="/(tabs)/Home" style={styles.link}>
-        Go back to Home screen
-      </Link>
-      <Link href="/" style={styles.link}>
-        Go to Onboarding
-      </Link>
+      <Text style={styles.title}>Welcome to the Account Tab</Text>
     </View>
   );
 }
@@ -25,7 +18,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 16,
     textAlign: "center",
   },
   link: {
