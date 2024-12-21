@@ -1,10 +1,10 @@
-import { openDatabaseAsync } from "expo-sqlite";
+import * as SQLite from "expo-sqlite";
 
 let db: any;
 
 export async function initDatabase() {
   try {
-    db = await openDatabaseAsync("simplefit.db");
+    db = await SQLite.openDatabaseAsync("simplefit.db");
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS Meals (
@@ -41,10 +41,16 @@ export async function addMeal(
   carbs: number,
   fat: number
 ) {
-  await db.runAsync(
-    "INSERT INTO Meals (foodName, quantity, calories, protein, carbs, fat) VALUES(?, ?, ?, ?, ?, ?)",
-    [foodName, quantity, calories, protein, carbs, fat]
-  );
+  try {
+    const result = await db.runAsync(
+      "INSERT INTO Meals (foodName, quantity, calories, protein, carbs, fat) VALUES (?, ?, ?, ?, ?, ?)",
+      [foodName, quantity, calories, protein, carbs, fat]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error adding meal:", error);
+    return null;
+  }
 }
 
 export async function addOnboardingData(
@@ -55,20 +61,25 @@ export async function addOnboardingData(
   heightInches: number | null,
   heightCm: number | null
 ) {
-  await db.runAsync(
-    `INSERT INTO Onboarding (age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm) 
-     VALUES(?, ?, ?, ?, ?, ?)`,
-
-    [age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm]
-  );
+  try {
+    const result = await db.runAsync(
+      `INSERT INTO Onboarding (age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error adding onboarding data:", error);
+    return null;
+  }
 }
 
 export async function getOnboardingData() {
   try {
-    const result = await db.getAsync(
+    const row = await db.getFirstAsync(
       "SELECT * FROM Onboarding ORDER BY id DESC LIMIT 1"
     );
-    return result?.rows?._array[0] || null;
+    return row || null;
   } catch (error) {
     console.error("Error getting onboarding data:", error);
     return null;

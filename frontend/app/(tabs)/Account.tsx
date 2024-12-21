@@ -2,72 +2,38 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
 } from "react-native";
-import { getOnboardingData, addOnboardingData } from "../../database";
+import { getOnboardingData } from "../../database";
 
 export default function AccountScreen() {
   const [onboardingData, setOnboardingData] = useState<any>(null);
-  const [age, setAge] = useState("");
-  const [bodyWeight, setBodyWeight] = useState("");
-  const [goalWeight, setGoalWeight] = useState("");
-  const [heightFeet, setHeightFeet] = useState("");
-  const [heightInches, setHeightInches] = useState("");
-  const [heightCm, setHeightCm] = useState("");
 
   useEffect(() => {
     async function fetchData() {
       const data = await getOnboardingData();
-      if (!data) {
-        // If there's no data, show a placeholder or return early
-        setOnboardingData(null);
-        return;
-      }
       setOnboardingData(data);
-      setAge(data.age.toString());
-      setBodyWeight(data.bodyWeight.toString());
-      setGoalWeight(data.goalWeight.toString());
-      setHeightFeet(data.heightFeet ? data.heightFeet.toString() : "");
-      setHeightInches(data.heightInches ? data.heightInches.toString() : "");
-      setHeightCm(data.heightCm ? data.heightCm.toString() : "");
     }
     fetchData();
   }, []);
 
-  const handleSave = async () => {
-    if (
-      !bodyWeight ||
-      isNaN(Number(bodyWeight)) ||
-      !goalWeight ||
-      isNaN(Number(goalWeight)) ||
-      (!heightFeet && !heightCm) ||
-      (heightFeet && isNaN(Number(heightFeet))) ||
-      (heightInches && isNaN(Number(heightInches))) ||
-      (heightCm && isNaN(Number(heightCm))) ||
-      !age ||
-      isNaN(Number(age))
-    ) {
-      Alert.alert("Error", "Please fill all fields correctly.");
-      return;
+  const formatHeight = (
+    feet: number | null,
+    inches: number | null,
+    cm: number | null
+  ) => {
+    if (feet !== null && inches !== null) {
+      return `${feet}'${inches}"`;
     }
-
-    await addOnboardingData(
-      Number(age),
-      Number(bodyWeight),
-      Number(goalWeight),
-      heightFeet ? Number(heightFeet) : null,
-      heightInches ? Number(heightInches) : null,
-      heightCm ? Number(heightCm) : null
-    );
-
-    Alert.alert("Success", "Data updated successfully.");
+    if (cm !== null) {
+      return `${cm} cm`;
+    }
+    return "Not set";
   };
 
-  if (onboardingData === null) {
+  if (!onboardingData) {
     return (
       <View style={styles.container}>
         <Text>No onboarding data found.</Text>
@@ -78,51 +44,45 @@ export default function AccountScreen() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.title}>Account Information</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Age"
-          value={age}
-          onChangeText={setAge}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Body Weight"
-          value={bodyWeight}
-          onChangeText={setBodyWeight}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Goal Weight"
-          value={goalWeight}
-          onChangeText={setGoalWeight}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Height (ft)"
-          value={heightFeet}
-          onChangeText={setHeightFeet}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Height (in)"
-          value={heightInches}
-          onChangeText={setHeightInches}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Height (cm)"
-          value={heightCm}
-          onChangeText={setHeightCm}
-          keyboardType="numeric"
-        />
-        <TouchableOpacity style={styles.button} onPress={handleSave}>
-          <Text style={styles.buttonText}>Save</Text>
+        <Text style={styles.title}>Profile Information</Text>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Age</Text>
+          <Text style={styles.value}>{onboardingData.age} years</Text>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Current Weight</Text>
+          <Text style={styles.value}>
+            {onboardingData.bodyWeight} {onboardingData.heightCm ? "kg" : "lbs"}
+          </Text>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Goal Weight</Text>
+          <Text style={styles.value}>
+            {onboardingData.goalWeight} {onboardingData.heightCm ? "kg" : "lbs"}
+          </Text>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Height</Text>
+          <Text style={styles.value}>
+            {formatHeight(
+              onboardingData.heightFeet,
+              onboardingData.heightInches,
+              onboardingData.heightCm
+            )}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => {
+            /* TODO: Navigate to edit screen */
+          }}
+        >
+          <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -132,27 +92,34 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "flex-start",
   },
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: "flex-start",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 30,
     textAlign: "center",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginVertical: 10,
+  infoContainer: {
+    backgroundColor: "#f5f5f5",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
   },
-  button: {
+  label: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 5,
+  },
+  value: {
+    fontSize: 18,
+    color: "#000",
+    fontWeight: "500",
+  },
+  editButton: {
     backgroundColor: "#007AFF",
     padding: 15,
     borderRadius: 10,
@@ -162,5 +129,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 18,
+    fontWeight: "500",
   },
 });
