@@ -85,3 +85,44 @@ export async function getOnboardingData() {
     return null;
   }
 }
+
+export async function updateOnboardingData(
+  id: number,
+  age: number,
+  bodyWeight: number,
+  goalWeight: number,
+  heightFeet: number | null,
+  heightInches: number | null,
+  heightCm: number | null
+) {
+  try {
+    // First check if record exists
+    const exists = await db.getFirstAsync(
+      "SELECT id FROM Onboarding WHERE id = ?",
+      [id]
+    );
+
+    let result;
+    if (!exists) {
+      // If no record exists, insert new one
+      result = await db.runAsync(
+        `INSERT INTO Onboarding (age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm]
+      );
+    } else {
+      // If record exists, update it
+      result = await db.runAsync(
+        `UPDATE Onboarding 
+         SET age = ?, bodyWeight = ?, goalWeight = ?, 
+             heightFeet = ?, heightInches = ?, heightCm = ?
+         WHERE id = ?`,
+        [age, bodyWeight, goalWeight, heightFeet, heightInches, heightCm, id]
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error updating onboarding data:", error);
+    return false;
+  }
+}
