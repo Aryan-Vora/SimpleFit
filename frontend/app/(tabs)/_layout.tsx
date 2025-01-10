@@ -27,6 +27,12 @@ export default function TabLayout() {
           title: "Progress",
         }}
       />
+      <Tabs.Screen 
+      name="Example"
+      options={{
+        title: "Example",
+      }}
+      />
     </Tabs>
   );
 }

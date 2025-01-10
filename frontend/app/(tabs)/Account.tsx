@@ -37,6 +37,7 @@ export default function AccountScreen() {
     return (
       <View style={styles.container}>
         <Text>No onboarding data found.</Text>
+        <Text>Current Data: {JSON.stringify(onboardingData)}</Text>
       </View>
     );
   }
