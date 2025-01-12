@@ -17,7 +17,6 @@ const MacroTrackerScreen = (props: MacroTrackerScreenProps) => {
 
   const handleAddMeal = async () => {
     const qty = parseInt(quantity) || 1;
-    // Simple calculation for demo
     const calories = qty * 100;
     const protein = qty * 5;
     const carbs = qty * 10;
