@@ -1,10 +1,10 @@
-import * as SQLite from "expo-sqlite";
+import * as SQLite from 'expo-sqlite';
 
 let db: any;
 
 export async function initDatabase() {
   try {
-    db = await SQLite.openDatabaseAsync("simplefit.db");
+    db = await SQLite.openDatabaseAsync('simplefit.db');
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS Meals (
@@ -28,7 +28,7 @@ export async function initDatabase() {
     `);
     return true;
   } catch (error) {
-    console.error("Database initialization error:", error);
+    console.error('Database initialization error:', error);
     return false;
   }
 }
@@ -43,12 +43,12 @@ export async function addMeal(
 ) {
   try {
     const result = await db.runAsync(
-      "INSERT INTO Meals (foodName, quantity, calories, protein, carbs, fat) VALUES (?, ?, ?, ?, ?, ?)",
+      'INSERT INTO Meals (foodName, quantity, calories, protein, carbs, fat) VALUES (?, ?, ?, ?, ?, ?)',
       [foodName, quantity, calories, protein, carbs, fat]
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error("Error adding meal:", error);
+    console.error('Error adding meal:', error);
     return null;
   }
 }
@@ -69,7 +69,7 @@ export async function addOnboardingData(
     );
     return result.lastInsertRowId;
   } catch (error) {
-    console.error("Error adding onboarding data:", error);
+    console.error('Error adding onboarding data:', error);
     return null;
   }
 }
@@ -77,11 +77,11 @@ export async function addOnboardingData(
 export async function getOnboardingData() {
   try {
     const row = await db.getFirstAsync(
-      "SELECT * FROM Onboarding ORDER BY id DESC LIMIT 1"
+      'SELECT * FROM Onboarding ORDER BY id DESC LIMIT 1'
     );
     return row || null;
   } catch (error) {
-    console.error("Error getting onboarding data:", error);
+    console.error('Error getting onboarding data:', error);
     return null;
   }
 }
@@ -98,7 +98,7 @@ export async function updateOnboardingData(
   try {
     // First check if record exists
     const exists = await db.getFirstAsync(
-      "SELECT id FROM Onboarding WHERE id = ?",
+      'SELECT id FROM Onboarding WHERE id = ?',
       [id]
     );
 
@@ -122,7 +122,7 @@ export async function updateOnboardingData(
     }
     return true;
   } catch (error) {
-    console.error("Error updating onboarding data:", error);
+    console.error('Error updating onboarding data:', error);
     return false;
   }
 }

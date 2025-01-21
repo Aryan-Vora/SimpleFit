@@ -34,7 +34,7 @@ export async function searchFood(query: string) {
     const data = await response.json();
     //return only first 5 results from common and first 5 from branded
     data.common = data.common.slice(0, 5);
-    data.branded = data.branded.slice(0, 5);
+    data.branded = data.branded.slice(0, 5); //not used right now
     return data;
   } catch (error) {
     console.error('Error fetching food data:', error);
@@ -71,7 +71,25 @@ export async function getNutrition(query: string) {
     }
 
     const data = await response.json();
-    return data;
+
+    // Filter and transform the response to include only desired fields
+    const simplifiedFoods = data.foods.map((food: any) => ({
+      food_name: food.food_name,
+      brand_name: food.brand_name,
+      serving_qty: food.serving_qty,
+      serving_unit: food.serving_unit,
+      serving_weight_grams: food.serving_weight_grams,
+      calories: food.nf_calories,
+      protein: food.nf_protein,
+      carbs: food.nf_total_carbohydrate,
+      fat: food.nf_total_fat,
+      sodium: food.nf_sodium,
+      cholesterol: food.nf_cholesterol,
+      sugars: food.nf_sugars,
+      photo: food.photo,
+    }));
+
+    return { foods: simplifiedFoods };
   } catch (error) {
     console.error('Error fetching food data:', error);
     throw error;
@@ -80,6 +98,28 @@ export async function getNutrition(query: string) {
 
 const app = new Application();
 const router = new Router();
+
+//main endpoint
+router.get('/natural/nutrients', async (ctx: any) => {
+  const query = ctx.request.url.searchParams.get('query');
+  if (!query) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Missing query parameter 'query'" };
+    return;
+  }
+
+  try {
+    const results = await getNutrition(query);
+    ctx.response.body = results;
+  } catch (error) {
+    ctx.response.status = 500;
+    if (error instanceof Error) {
+      ctx.response.body = { error: error.message };
+    } else {
+      ctx.response.body = { error: 'An unknown error occurred' };
+    }
+  }
+});
 
 router.get('/search', async (ctx: any) => {
   const query = ctx.request.url.searchParams.get('query');
