@@ -1,12 +1,12 @@
-import "jsr:@std/dotenv/load";
-import { Application, Router } from "jsr:@oak/oak";
+import 'jsr:@std/dotenv/load';
+import { Application, Router } from 'jsr:@oak/oak';
 
-const appId = Deno.env.get("NUTRITIONX_APP_ID");
-const apiKey = Deno.env.get("NUTRITIONX_API_KEY");
+const appId = Deno.env.get('NUTRITIONX_APP_ID');
+const apiKey = Deno.env.get('NUTRITIONX_API_KEY');
 
 export async function searchFood(query: string) {
   if (!appId || !apiKey) {
-    throw new Error("Missing Nutritionix API credentials");
+    throw new Error('Missing Nutritionix API credentials');
   }
 
   try {
@@ -15,11 +15,11 @@ export async function searchFood(query: string) {
         query
       )}`,
       {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
-          "x-app-id": appId,
-          "x-app-key": apiKey,
+          'Content-Type': 'application/json',
+          'x-app-id': appId,
+          'x-app-key': apiKey,
         },
       }
     );
@@ -37,25 +37,25 @@ export async function searchFood(query: string) {
     data.branded = data.branded.slice(0, 5);
     return data;
   } catch (error) {
-    console.error("Error fetching food data:", error);
+    console.error('Error fetching food data:', error);
     throw error;
   }
 }
 
 export async function getNutrition(query: string) {
   if (!appId || !apiKey) {
-    throw new Error("Missing Nutritionix API credentials");
+    throw new Error('Missing Nutritionix API credentials');
   }
 
   try {
     const response = await fetch(
       `https://trackapi.nutritionix.com/v2/natural/nutrients`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "x-app-id": appId,
-          "x-app-key": apiKey,
+          'Content-Type': 'application/json',
+          'x-app-id': appId,
+          'x-app-key': apiKey,
         },
         body: JSON.stringify({
           query,
@@ -73,7 +73,7 @@ export async function getNutrition(query: string) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching food data:", error);
+    console.error('Error fetching food data:', error);
     throw error;
   }
 }
@@ -81,11 +81,11 @@ export async function getNutrition(query: string) {
 const app = new Application();
 const router = new Router();
 
-router.get("/search", async (ctx: any) => {
-  const query = ctx.request.url.searchParams.get("q");
+router.get('/search', async (ctx: any) => {
+  const query = ctx.request.url.searchParams.get('query');
   if (!query) {
     ctx.response.status = 400;
-    ctx.response.body = { error: "Missing query parameter 'q'" };
+    ctx.response.body = { error: "Missing query parameter 'query'" };
     return;
   }
 
@@ -97,28 +97,28 @@ router.get("/search", async (ctx: any) => {
     if (error instanceof Error) {
       ctx.response.body = { error: error.message };
     } else {
-      ctx.response.body = { error: "An unknown error occurred" };
+      ctx.response.body = { error: 'An unknown error occurred' };
     }
   }
 });
 
-router.post("/nutrition", async (ctx: any) => {
+router.get('/nutrition', async (ctx: any) => {
+  const query = ctx.request.url.searchParams.get('query');
+  if (!query) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Missing query parameter 'query'" };
+    return;
+  }
+
   try {
-    const body = ctx.request.body;
-    const result = await body.json();
-    if (!result.query) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Missing query in request body" };
-      return;
-    }
-    const results = await getNutrition(result.query);
+    const results = await getNutrition(query);
     ctx.response.body = results;
   } catch (error) {
     ctx.response.status = 500;
     if (error instanceof Error) {
       ctx.response.body = { error: error.message };
     } else {
-      ctx.response.body = { error: "An unknown error occurred" };
+      ctx.response.body = { error: 'An unknown error occurred' };
     }
   }
 });
@@ -127,6 +127,6 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 if (import.meta.main) {
-  console.log("Server running on http://localhost:8000");
+  console.log('Server running on http://localhost:8000');
   await app.listen({ port: 8000 });
 }
